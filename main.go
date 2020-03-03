@@ -3,14 +3,14 @@ package main
 import (
 	"clang-tidy-by-ninja-generator/compiledb"
 	"fmt"
+	"os"
 )
 
 func main() {
-	fmt.Println("hoge")
-
 	compileCommands, err := compiledb.LoadCompileDB("compile_commands.json")
 	if err != nil {
-		panic(err)
+		fmt.Errorf("load fail compile_commadns.json")
+		os.Exit(1)
 	}
 
 	for _, command := range compileCommands {
