@@ -1,0 +1,7 @@
+{
+    "root_directory" : "D:/tools/llvm-project/",
+    "command" : "clang-tidy -header-filter=.* -extra-arg=\"-fms-compatibility-version=19.24\" --export-fixes=\"./tidy-ymls/$out.yml\" $in",
+    "ignore_words" : [
+        "windows_version_resource.rc"
+    ]
+}
