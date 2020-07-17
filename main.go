@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -40,7 +41,10 @@ func generateNinjaFile(compileCommands []compiledb.CompileCommand, config Config
 	setting += "    description = \"tidy source code $in\"\n"
 	setting += "    command = " + config.Command + "\n\n"
 
+	buildRuleMap := map[string]string{}
+
 	for _, command := range compileCommands {
+		command.File = filepath.ToSlash(command.File)
 		if len(config.RootDirectory) > 0 {
 			command.File = strings.Replace(command.File, config.RootDirectory, "", -1)
 		}
@@ -58,10 +62,18 @@ func generateNinjaFile(compileCommands []compiledb.CompileCommand, config Config
 			continue
 		}
 
-		output := command.File
-		output = strings.Replace(output, "/", "-", -1)
-		output = strings.Replace(output, ".cpp", "", -1)
-		setting += fmt.Sprintf("build %v: tidy %v\n", output, command.File)
+		buildRule := command.File
+		buildRule = strings.Replace(buildRule, "/", "-", -1)
+		buildRule = strings.Replace(buildRule, ".cpp", "", -1)
+		_, ok := buildRuleMap[buildRule]
+		if ok {
+			// 同じビルドルールは書き出さない
+			continue
+		}
+
+		buildRuleMap[buildRule] = command.File
+
+		setting += fmt.Sprintf("build %v: tidy %v\n", buildRule, command.File)
 	}
 
 	ioutil.WriteFile("build.ninja", []byte(setting), 0755)
